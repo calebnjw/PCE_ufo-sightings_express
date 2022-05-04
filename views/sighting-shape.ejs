@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <%- include('partials/styles.ejs') %>
+</head>
+<body>
+  <div class="container">
+    <h1>Sightings of <%= shape %>s</h1>
+    <hr />
+    <% sightings.forEach((sight, index) => { %>
+      <% if (sight.shape === shape) { %>
+        <h3><a href="/sighting/<%= index %>"> <%= index %>: <%= sight.city, sight.state %> </a></h3>
+        <p> <%= sight.date_time %> </p>
+        <p> <%= sight.summary %> </p>
+        <br />
+        <hr />
+      <% } %>
+    <% }) %> 
+  </div>
+  <!-- <div class="container">
+    <h1>Sightings of <%= shape %>s</h1>
+    <% console.log(shape) %>
+    <hr />
+    <% sightings.forEach((sight, index) => { %>
+      <h3> <%= index %>: <%= sight.city, sight.state %> </h3>
+      <p> <%= sight.date_time %> </p>
+      <p> <%= sight.summary %> </p>
+      <br />
+      <hr />
+    <% }) %> 
+  </div> -->
+
+  <%- include('partials/scripts.ejs') %>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <%- include('partials/styles.ejs') %>
+</head>
+<body>
+  <div class="container">
+    <h1>Sighting <%= sighting.index %></h1>
+
+    <h3>Sighting Information: </h3>
+    <p><%= sighting.text %></p>
+
+    <h3>Date and Time:</h3>
+    <p><%= sighting.date_time %></p>
+
+    <h3>City and State</h3>
+    <p><%= sighting.city %>, <%= sighting.state %></p>
+
+    <h3>Shape:</h3>
+    <p><%= sighting.shape %></p>
+
+    <h3>Duration:</h3>
+    <p><%= sighting.duration %></p>
+
+    <h3>Summary</h3>
+    <p><%= sighting.summary %></p>
+
+    <form action="/sighting/<%= sighting.index %>/delete?_method=DELETE" method="POST">
+      <input type="button" value="Edit" onclick="window.location.href='/sighting/<%= sighting.index %>/edit';" />
+      <input type="submit" value="Delete" />
+    </form>
+  </div>
+
+  <%- include('partials/scripts.ejs') %>
+</body>
+</html>
