@@ -16,6 +16,12 @@ app.set('view engine', 'ejs');
 app.get('/', (request, response) => {
   console.log('DISPLAY ALL: GET REQUEST');
 
+  let favourite = false;
+  if (request.cookies.favourite) {
+    favourite = request.cookies.favourite;
+    console.log(favourite);
+  }
+
   readFile('data.json', 'utf-8', (error, content) => {
     if (error) {
       console.log(error);
@@ -23,6 +29,8 @@ app.get('/', (request, response) => {
     }
 
     const JSONobject = JSON.parse(content);
+    JSONobject.favourite = favourite;
+
     response.render('index', JSONobject);
   });
 });
@@ -258,13 +266,15 @@ app.get('/shapes/:shape', (request, response) => {
 });
 
 // display form to enter new sighting
-app.get('/favourite', (request, response) => {
+app.get('/favourite/:index', (request, response) => {
   console.log('SETTING FAVOURITE COOKIE');
 
-  const index = request.cookies.sighting;
-  response.cookie('favourite', index);
+  const { index } = request.params;
 
-  response.send('COOKIE SET');
+  // creates a cookie that saves the favourite sighting
+  response.cookie('favourite', index);
+  // this redirects the user back to the home page after setting the favourite
+  response.redirect('/');
 });
 
 app.listen(3004, () => {

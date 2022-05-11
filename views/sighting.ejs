@@ -12,6 +12,13 @@
   <div class="container">
     <h1>Sighting <%= sighting.index %></h1>
 
+    <br />
+    <!-- submits the sighting index into the route -->
+    <form action="/favourite/<%= sighting.index %>" class="">
+      <input type="submit" value="Favourite" />
+    </form>
+    <br />
+
     <h3>Sighting Information: </h3>
     <p><%= sighting.text %></p>
 
@@ -33,7 +40,6 @@
     <form action="/sighting/<%= sighting.index %>/delete?_method=DELETE" method="POST">
       <input type="button" value="Edit" onclick="window.location.href='/sighting/<%= sighting.index %>/edit';" />
       <input type="submit" value="Delete" />
-      <input type="button" value="Favourite" onclick="window.location.href='/favourite';" />
     </form>
   </div>
 

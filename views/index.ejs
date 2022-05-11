@@ -12,7 +12,19 @@
   <div class="container">
     <h1>Sightings</h1>
     <hr />
+    <!-- if favourite is a value, and not false, render this: -->
+    <% if (favourite) { %>
+      <br />
+      <!-- favourite is a number referring to the index -->
+      <h3> Favourite Sighting: <a href="/sighting/<%= favourite %>"> <%= favourite %>: <%= sightings[favourite].city, sightings[favourite].state %> </a></h3>
+      <p> <%= sightings[favourite].date_time %> </p>
+      <p> <%= sightings[favourite].summary %> </p>
+      <br />
+      <hr />
+      <br />
+    <% } %>
     <% sightings.forEach((sight, index) => { %>
+      <br />
       <h3> <a href="/sighting/<%= index %>"> <%= index %>: <%= sight.city, sight.state %> </a></h3>
       <p> <%= sight.date_time %> </p>
       <p> <%= sight.summary %> </p>
