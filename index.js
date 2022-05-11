@@ -1,10 +1,12 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import methodOverride from 'method-override';
 import { readFile, writeFile } from 'fs';
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride('_method'));
@@ -70,6 +72,7 @@ app.post('/sighting', (request, response) => {
         return;
       }
 
+      // use redirect
       response.render('sighting', { sighting });
     });
   });
@@ -81,37 +84,34 @@ app.get('/sighting/:index', (request, response) => {
 
   const { index } = request.params;
 
-  // request.params is reading style.css as one of the request params
-  // this check is to stop it from throwing an error
-  if (isNaN(index)) {
-    response.end();
-  } else {
-    // same old read file
-    readFile('data.json', 'utf-8', (readError, content) => {
-      if (readError) {
-        console.log(readError);
-        return;
-      }
+  const { cookie } = response.cookie('sighting', index);
+  console.log('Cookie:', cookie);
 
-      // JSON object with key "sightings" and value which is an array of sighting objects
-      const JSONobject = JSON.parse(content);
+  // same old read file
+  readFile('data.json', 'utf-8', (readError, content) => {
+    if (readError) {
+      console.log(readError);
+      return;
+    }
 
-      // sighting object at index
-      const sighting = JSONobject.sightings[index];
+    // JSON object with key "sightings" and value which is an array of sighting objects
+    const JSONobject = JSON.parse(content);
 
-      // if there is a sighting object,
-      if (sighting) {
-        // add the store the index in the object
-        // (so that the page can render its own index
-        sighting.index = index;
-        // and render the new sighting
-        response.render('sighting', { sighting });
-      } else {
-        // if not, tell the user there is no sighting at this index
-        response.send('No sighting at this index, try again.');
-      }
-    });
-  }
+    // sighting object at index
+    const sighting = JSONobject.sightings[index];
+
+    // if there is a sighting object,
+    if (sighting) {
+      // add the store the index in the object
+      // (so that the page can render its own index
+      sighting.index = index;
+      // and render the new sighting
+      response.render('sighting', { sighting });
+    } else {
+      // if not, tell the user there is no sighting at this index
+      response.send('No sighting at this index, try again.');
+    }
+  });
 });
 
 // display edit form at index with fields populated
@@ -120,27 +120,23 @@ app.get('/sighting/:index/edit', (request, response) => {
 
   const { index } = request.params;
 
-  if (isNaN(index)) {
-    response.end();
-  } else {
-    readFile('data.json', 'utf-8', (readError, content) => {
-      if (readError) {
-        console.log(readError);
-        return;
-      }
+  readFile('data.json', 'utf-8', (readError, content) => {
+    if (readError) {
+      console.log(readError);
+      return;
+    }
 
-      const JSONobject = JSON.parse(content);
+    const JSONobject = JSON.parse(content);
 
-      const sighting = JSONobject.sightings[index];
+    const sighting = JSONobject.sightings[index];
 
-      if (sighting) {
-        sighting.index = index;
-        response.render('edit-sighting', { sighting });
-      } else {
-        response.send('No sighting at this index, try again.');
-      }
-    });
-  }
+    if (sighting) {
+      sighting.index = index;
+      response.render('edit-sighting', { sighting });
+    } else {
+      response.send('No sighting at this index, try again.');
+    }
+  });
 });
 
 // submit button will call this put request at the same route
@@ -149,37 +145,33 @@ app.put('/sighting/:index/edit', (request, response) => {
 
   const { index } = request.params;
 
-  if (isNaN(index)) {
-    response.end();
-  } else {
-    readFile('data.json', 'utf-8', (readError, content) => {
-      if (readError) {
-        console.log(readError);
+  readFile('data.json', 'utf-8', (readError, content) => {
+    if (readError) {
+      console.log(readError);
+      return;
+    }
+
+    const JSONobject = JSON.parse(content);
+
+    const sighting = JSON.parse(JSON.stringify(request.body));
+
+    // replacing sighting object at index with updated content
+    JSONobject.sightings[index] = sighting;
+
+    const output = JSON.stringify(JSONobject);
+
+    sighting.index = index;
+
+    writeFile('data.json', output, (writeError) => {
+      if (writeError) {
+        console.log(writeError);
         return;
       }
 
-      const JSONobject = JSON.parse(content);
-
-      const sighting = JSON.parse(JSON.stringify(request.body));
-
-      // replacing sighting object at index with updated content
-      JSONobject.sightings[index] = sighting;
-
-      const output = JSON.stringify(JSONobject);
-
-      sighting.index = index;
-
-      writeFile('data.json', output, (writeError) => {
-        if (writeError) {
-          console.log(writeError);
-          return;
-        }
-
-        // render the edited sighting
-        response.render('sighting', { sighting });
-      });
+      // render the edited sighting
+      response.render('sighting', { sighting });
     });
-  }
+  });
 });
 
 // delete button will call this delete request at the same route
@@ -187,33 +179,29 @@ app.put('/sighting/:index/edit', (request, response) => {
 app.delete('/sighting/:index/delete', (request, response) => {
   const { index } = request.params;
 
-  if (isNaN(index)) {
-    response.end();
-  } else {
-    readFile('data.json', 'utf-8', (readError, content) => {
-      if (readError) {
-        console.log(readError);
+  readFile('data.json', 'utf-8', (readError, content) => {
+    if (readError) {
+      console.log(readError);
+      return;
+    }
+
+    const JSONobject = JSON.parse(content);
+
+    // using splice to delete object at index
+    JSONobject.sightings.splice(index, 1);
+
+    const output = JSON.stringify(JSONobject);
+
+    writeFile('data.json', output, (writeError) => {
+      if (writeError) {
+        console.log(writeError);
         return;
       }
 
-      const JSONobject = JSON.parse(content);
-
-      // using splice to delete object at index
-      JSONobject.sightings.splice(index, 1);
-
-      const output = JSON.stringify(JSONobject);
-
-      writeFile('data.json', output, (writeError) => {
-        if (writeError) {
-          console.log(writeError);
-          return;
-        }
-
-        // send the user back home
-        response.render('index', JSONobject);
-      });
+      // send the user back home
+      response.render('index', JSONobject);
     });
-  }
+  });
 });
 
 // display all shapes
@@ -267,6 +255,16 @@ app.get('/shapes/:shape', (request, response) => {
       response.render('sighting-shape', JSONobject);
     });
   }
+});
+
+// display form to enter new sighting
+app.get('/favourite', (request, response) => {
+  console.log('SETTING FAVOURITE COOKIE');
+
+  const index = request.cookies.sighting;
+  response.cookie('favourite', index);
+
+  response.send('COOKIE SET');
 });
 
 app.listen(3004, () => {
